@@ -50,18 +50,17 @@ class Subscriptions(models.Model):
                              verbose_name='Пользователь')
     subscriber = models.ForeignKey(User, on_delete=models.CASCADE,
                                    verbose_name='Подписчик',
-                                   verbose_name_plural='Подписчики',
                                    related_name='subscribing'
                                    )
 
     class Meta:
-        odering = ['id'],
+        ordering = ['id'],
         verbose_name = 'Подписка',
         verbose_name_plural = 'Подписки',
-        constraints = models.UniqueConstraint(
+        constraints = (models.UniqueConstraint(
             fields=['user', 'subscriber'],
             name='Unique subscription checker'
-        )
+        ),)
 
 
 class Recipe(models.Model):
@@ -73,13 +72,12 @@ class Recipe(models.Model):
     image = models.ImageField('Изображение', upload_to='recipes/')
     text = models.TextField('Описание')
     ingredients = models.ManyToManyField(Ingredient,
-                                         through='Ingredient_amount',
+                                         through='Ingredientsamount',
                                          related_name='recipes',
                                          verbose_name='Ингредиенты'
                                          )
     tag = models.ManyToManyField(Tag,
                                  verbose_name='Тэг',
-                                 verbose_name_plural='Тэги'
                                  )
     cooking_time = models.PositiveSmallIntegerField(
         validators=[validators.MinValueValidator(1,
