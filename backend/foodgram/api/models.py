@@ -54,9 +54,9 @@ class Subscriptions(models.Model):
                                    )
 
     class Meta:
-        ordering = ['id'],
-        verbose_name = 'Подписка',
-        verbose_name_plural = 'Подписки',
+        ordering = ['id']
+        verbose_name = 'Подписка'
+        verbose_name_plural = 'Подписки'
         constraints = (models.UniqueConstraint(
             fields=['user', 'subscriber'],
             name='Unique subscription checker'
@@ -64,10 +64,10 @@ class Subscriptions(models.Model):
 
 
 class Recipe(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE,
-                             verbose_name='Автор',
-                             related_name='recipes'
-                             )
+    author = models.ForeignKey(User, on_delete=models.CASCADE,
+                               verbose_name='Автор',
+                               related_name='recipes'
+                               )
     name = models.CharField('Название', max_length=200)
     image = models.ImageField('Изображение', upload_to='recipes/')
     text = models.TextField('Описание')
@@ -80,16 +80,19 @@ class Recipe(models.Model):
                                  verbose_name='Тэг',
                                  )
     cooking_time = models.PositiveSmallIntegerField(
-        validators=[validators.MinValueValidator(1,
-                    message='Время приготовления не может быть менее 1 минуты!'
-                                                 )
-                    ],
-        verbose_name='Время приготовления в минутах'
+        validators=[
+            validators.MinValueValidator(
+                1,
+                message='Минимальное время приготовления 1 минута'
+            )
+        ],
+        verbose_name='Время приготовления',
+
     )
 
     class Meta:
-        ordering = ['-id'],
-        verbose_name = 'Рецепт',
+        ordering = ['-id']
+        verbose_name = 'Рецепт'
         verbose_name_plural = 'Рецепты'
 
     def __str__(self):
@@ -104,8 +107,8 @@ class IngredientsAmount(models.Model):
     amount = models.PositiveSmallIntegerField('Количество')
 
     class Meta:
-        verbose_name = 'Количество ингредиента',
-        verbose_name_plural = 'Количества ингредиентов'
+        verbose_name = 'ингредиент'
+        verbose_name_plural = 'ингредиенты'
 
 
 class Favorite(models.Model):
@@ -116,8 +119,8 @@ class Favorite(models.Model):
                                verbose_name='Рецепт')
 
     class Meta:
-        ordering = ['-id'],
-        verbose_name = 'Избранный рецепт',
+        ordering = ['-id']
+        verbose_name = 'Избранный рецепт'
         verbose_name_plural = 'Избранные рецепты'
 
 
@@ -129,6 +132,6 @@ class Cart(models.Model):
                                verbose_name='Рецепт')
 
     class Meta:
-        ordering = ['-id'],
-        verbose_name = 'Рецепт в корзине',
+        ordering = ['-id']
+        verbose_name = 'Рецепт в корзине'
         verbose_name_plural = 'Рецепты в корзине'
