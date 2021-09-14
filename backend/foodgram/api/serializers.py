@@ -47,7 +47,7 @@ class IngredientsAmountSerializer(serializers.ModelSerializer):
 
 class RecipeSerializer(serializers.ModelSerializer):
     image = Base64ImageField()
-    tags = TagSerializer(read_only=True, many=True)
+    tag = TagSerializer(read_only=True, many=True)
     author = UserSerializer(read_only=True)
     ingredients = IngredientsAmountSerializer(
         source='ingredientamount_set',
@@ -59,7 +59,7 @@ class RecipeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Recipe
-        fields = ('id', 'tags', 'author', 'ingredients', 'is_favorited',
+        fields = ('id', 'tag', 'author', 'ingredients', 'is_favorited',
                   'is_in_shopping_cart', 'name', 'image', 'text',
                   'cooking_time')
 
@@ -90,8 +90,8 @@ class RecipeSerializer(serializers.ModelSerializer):
         image = validated_data.pop('image')
         ingredients_data = validated_data.pop('ingredients')
         recipe = Recipe.objects.create(image=image, **validated_data)
-        tags_data = self.initial_data.get('tags')
-        recipe.tags.set(tags_data)
+        tags_data = self.initial_data.get('tag')
+        recipe.tag.set(tags_data)
 
         for ingredient in ingredients_data:
             IngredientsAmount.objects.create(
@@ -111,8 +111,8 @@ class RecipeSerializer(serializers.ModelSerializer):
             'cooking_time', instance.cooking_time
         )
         instance.tags.clear()
-        tags_data = self.initial_data.get('tags')
-        instance.tags.set(tags_data)
+        tags_data = self.initial_data.get('tag')
+        instance.tag.set(tags_data)
         IngredientsAmount.objects.filter(recipe=instance).all().delete()
 
         for ingredient in validated_data.get('ingredients'):

@@ -105,7 +105,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         user = request.user
         final_list = {}
         ingredients = IngredientsAmount.objects.filter(
-            recipe__in_cart__user=user
+            recipe__incart__user=user
         )
         for ingredient_item in ingredients:
             name = ingredient_item.ingredient.name
