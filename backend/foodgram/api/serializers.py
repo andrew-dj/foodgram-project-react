@@ -1,8 +1,7 @@
 from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
 
-from .models import (Ingredient,
-                     IngredientsAmount, Recipe, Subscriptions, Tag, User)
+from .models import Ingredient, IngredientAmount, Recipe, Subscribe, Tag, User
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -17,8 +16,7 @@ class UserSerializer(serializers.ModelSerializer):
         user = self.context.get('request').user
         if user.is_anonymous:
             return False
-        return Subscriptions.objects.filter(user=user,
-                                            subscriber=obj.id).exists()
+        return Subscribe.objects.filter(user=user, subscriber=obj.id).exists()
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -27,13 +25,13 @@ class TagSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'color', 'slug')
 
 
-class IngredientsSerializer(serializers.ModelSerializer):
+class IngredientSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ingredient
         fields = '__all__'
 
 
-class IngredientsAmountSerializer(serializers.ModelSerializer):
+class IngredientAmountSerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField(source='ingredient.id')
     name = serializers.ReadOnlyField(source='ingredient.name')
     measurement_unit = serializers.ReadOnlyField(
@@ -41,15 +39,15 @@ class IngredientsAmountSerializer(serializers.ModelSerializer):
     )
 
     class Meta:
-        model = IngredientsAmount
+        model = IngredientAmount
         fields = ('id', 'name', 'measurement_unit', 'amount')
 
 
 class RecipeSerializer(serializers.ModelSerializer):
     image = Base64ImageField()
-    tag = TagSerializer(read_only=True, many=True)
+    tags = TagSerializer(read_only=True, many=True)
     author = UserSerializer(read_only=True)
-    ingredients = IngredientsAmountSerializer(
+    ingredients = IngredientAmountSerializer(
         source='ingredientamount_set',
         many=True,
         read_only=True,
@@ -59,7 +57,7 @@ class RecipeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Recipe
-        fields = ('id', 'tag', 'author', 'ingredients', 'is_favorited',
+        fields = ('id', 'tags', 'author', 'ingredients', 'is_favorited',
                   'is_in_shopping_cart', 'name', 'image', 'text',
                   'cooking_time')
 
@@ -90,11 +88,11 @@ class RecipeSerializer(serializers.ModelSerializer):
         image = validated_data.pop('image')
         ingredients_data = validated_data.pop('ingredients')
         recipe = Recipe.objects.create(image=image, **validated_data)
-        tags_data = self.initial_data.get('tag')
-        recipe.tag.set(tags_data)
+        tags_data = self.initial_data.get('tags')
+        recipe.tags.set(tags_data)
 
         for ingredient in ingredients_data:
-            IngredientsAmount.objects.create(
+            IngredientAmount.objects.create(
                 recipe=recipe,
                 ingredient_id=ingredient.get('id'),
                 amount=ingredient.get('amount'),
@@ -111,12 +109,12 @@ class RecipeSerializer(serializers.ModelSerializer):
             'cooking_time', instance.cooking_time
         )
         instance.tags.clear()
-        tags_data = self.initial_data.get('tag')
-        instance.tag.set(tags_data)
-        IngredientsAmount.objects.filter(recipe=instance).all().delete()
+        tags_data = self.initial_data.get('tags')
+        instance.tags.set(tags_data)
+        IngredientAmount.objects.filter(recipe=instance).all().delete()
 
         for ingredient in validated_data.get('ingredients'):
-            ingredient_amount_obj = IngredientsAmount.objects.create(
+            ingredient_amount_obj = IngredientAmount.objects.create(
                 recipe=instance,
                 ingredient_id=ingredient.get('id'),
                 amount=ingredient.get('amount')
@@ -149,12 +147,12 @@ class SubscribeSerializer(serializers.ModelSerializer):
     recipes_count = serializers.SerializerMethodField()
 
     class Meta:
-        model = Subscriptions
+        model = Subscribe
         fields = ('id', 'email', 'username', 'first_name', 'last_name',
                   'is_subscribed', 'recipes', 'recipes_count')
 
     def get_is_subscribed(self, obj):
-        return Subscriptions.objects.filter(
+        return Subscribe.objects.filter(
             user=obj.user, subscriber=obj.subscriber
         ).exists()
 

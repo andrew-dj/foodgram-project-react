@@ -12,11 +12,11 @@ from rest_framework.response import Response
 
 from .filters import IngredientSearchFilter, TagAndAuthorFilter
 from .mixins import BaseTagAndIngredientViewSet
-from .models import (Cart, Favorite, Ingredient, IngredientsAmount, Recipe,
-                     Subscriptions, Tag, User)
+from .models import (Cart, Favorite, Ingredient, IngredientAmount, Recipe,
+                     Subscribe, Tag, User)
 from .paginations import LimitPageNumberPagination
 from .permissions import IsAuthorOrReadOnly, IsStaffOrReadOnly
-from .serializers import (IngredientsSerializer, RecipeMinifiedSerializer,
+from .serializers import (IngredientSerializer, RecipeMinifiedSerializer,
                           RecipeSerializer, SubscribeSerializer, TagSerializer,
                           UserSerializer)
 
@@ -28,7 +28,7 @@ class TagsViewSet(BaseTagAndIngredientViewSet):
 
 class IngredientsViewSet(BaseTagAndIngredientViewSet):
     queryset = Ingredient.objects.all()
-    serializer_class = IngredientsSerializer
+    serializer_class = IngredientSerializer
     filter_backends = [IngredientSearchFilter]
     search_fields = ['^name']
 
@@ -104,8 +104,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def download_shopping_cart(self, request):
         user = request.user
         final_list = {}
-        ingredients = IngredientsAmount.objects.filter(
-            recipe__incart__user=user
+        ingredients = IngredientAmount.objects.filter(
+            recipe__in_cart__user=user
         )
         for ingredient_item in ingredients:
             name = ingredient_item.ingredient.name
@@ -179,15 +179,14 @@ class CustomUserViewSet(UserViewSet):
         user = request.user
         subscriber = get_object_or_404(User, id=id)
 
-        if (Subscriptions.objects.filter(user=user, subscriber=subscriber)
+        if (Subscribe.objects.filter(user=user, subscriber=subscriber)
                 .exists() or user == subscriber):
             return Response({
-                'errors': ('Вы уже подписаны на этого пользователя, '
+                'errors': ('Вы уже подписаны на этого пользователя '
                            'или подписываетесь на самого себя')
             }, status=status.HTTP_400_BAD_REQUEST)
 
-        subscribe = Subscriptions.objects.create(user=user,
-                                                 subscriber=subscriber)
+        subscribe = Subscribe.objects.create(user=user, subscriber=subscriber)
         subscribe.save()
         serializer = SubscribeSerializer(
             subscribe, context={'request': request}
@@ -198,7 +197,7 @@ class CustomUserViewSet(UserViewSet):
     def del_subscribe(self, request, id=None):
         user = request.user
         subscriber = get_object_or_404(User, id=id)
-        subscribe = Subscriptions.objects.filter(
+        subscribe = Subscribe.objects.filter(
             user=user, subscriber=subscriber
         )
         if subscribe.exists():
@@ -212,7 +211,7 @@ class CustomUserViewSet(UserViewSet):
     @action(detail=False, permission_classes=[IsAuthenticated])
     def subscriptions(self, request):
         user = request.user
-        queryset = Subscriptions.objects.filter(user=user)
+        queryset = Subscribe.objects.filter(user=user)
         pages = self.paginate_queryset(queryset)
         serializer = SubscribeSerializer(
             pages,

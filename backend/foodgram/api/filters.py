@@ -10,7 +10,7 @@ class IngredientSearchFilter(SearchFilter):
 
 class TagAndAuthorFilter(FilterSet):
     tags = filters.AllValuesMultipleFilter(
-        field_name='tag__slug'
+        field_name='tags__slug'
     )
     author = filters.ModelChoiceFilter(
         queryset=User.objects.all()
@@ -18,4 +18,4 @@ class TagAndAuthorFilter(FilterSet):
 
     class Meta:
         model = Recipe
-        fields = ['tag', 'author']
+        fields = ['tags', 'author']

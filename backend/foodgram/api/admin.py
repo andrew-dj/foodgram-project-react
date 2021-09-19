@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 
-from .models import Cart, Favorite, Ingredient,Recipe, Subscriptions, Tag, User
+from .models import Cart, Favorite, Ingredient, Recipe, Subscribe, Tag, User
 
 
 class IngredientAmountInline(admin.TabularInline):
@@ -22,8 +22,8 @@ class IngredientAdmin(admin.ModelAdmin):
 
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
-    list_display = ['name', 'author']
-    list_filter = ['name', 'author', 'tag']
+    list_display = ['name', 'author', 'in_favorites']
+    list_filter = ['author', 'tags']
     search_fields = ['name']
     inlines = [IngredientAmountInline]
 
@@ -31,23 +31,24 @@ class RecipeAdmin(admin.ModelAdmin):
         return obj.favorites.count()
 
 
-@admin.register(User)
-class CustomUserAdmin(UserAdmin):
-    list_display = ['email', 'username']
-
-
-@admin.register(Cart)
-class CartAdmin(admin.ModelAdmin):
-    list_display = ['user', 'recipe']
-
-
-@admin.register(Subscriptions)
-class SubscriptionsAdmin(admin.ModelAdmin):
-    list_display = ['user', 'subscriber']
-
-
 @admin.register(Favorite)
 class FavoriteAdmin(admin.ModelAdmin):
     list_display = ['user', 'recipe']
     list_filter = ['user']
     search_fields = ['user__username', 'recipe__name']
+
+
+@admin.register(Cart)
+class CartAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(Subscribe)
+class SubscribeAdmin(admin.ModelAdmin):
+    list_display = ['user', 'subscriber']
+
+
+@admin.register(User)
+class CustomUserAdmin(UserAdmin):
+    list_display = ['email', 'username', 'is_staff']
+    list_filter = ['is_staff']
