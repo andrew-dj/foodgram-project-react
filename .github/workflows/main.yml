@@ -1,4 +1,4 @@
-name: YaMDB_final workflow
+name: Diploma workflow
 
 on: [push]
 
