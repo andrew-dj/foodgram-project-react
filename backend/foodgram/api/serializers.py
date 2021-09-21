@@ -1,5 +1,5 @@
 from drf_extra_fields.fields import Base64ImageField
-from rest_framework import serializers
+from rest_framework import serializers, decorators
 
 from .models import Ingredient, IngredientAmount, Recipe, Subscribe, Tag, User
 
@@ -84,6 +84,15 @@ class RecipeSerializer(serializers.ModelSerializer):
         data['ingredients'] = ingredients
         return data
 
+    def save_or_update_ingredients(self):
+        for ingredient in self.ingredients_data:
+            ingredients_list = IngredientAmount.objects.create(
+                recipe=self.recipe,
+                ingredient_id=ingredient.get('id'),
+                amount=ingredient.get('amount'),
+            )
+        return ingredients_list
+
     def create(self, validated_data):
         image = validated_data.pop('image')
         ingredients_data = validated_data.pop('ingredients')
@@ -91,12 +100,14 @@ class RecipeSerializer(serializers.ModelSerializer):
         tags_data = self.initial_data.get('tags')
         recipe.tags.set(tags_data)
 
-        for ingredient in ingredients_data:
-            IngredientAmount.objects.create(
-                recipe=recipe,
-                ingredient_id=ingredient.get('id'),
-                amount=ingredient.get('amount'),
-            )
+        recipe.save_or_update_ingredients
+
+        # for ingredient in ingredients_data:
+        #     IngredientAmount.objects.create(
+        #         recipe=recipe,
+        #         ingredient_id=ingredient.get('id'),
+        #         amount=ingredient.get('amount'),
+        #     )
         recipe.is_favorited = False
         recipe.is_in_shopping_cart = False
         return recipe
