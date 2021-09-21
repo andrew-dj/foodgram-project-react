@@ -50,3 +50,6 @@ docker-compose exec backend python manage.py collectstatic --no-input
 >>> Создаем суперпользователя:
 docker-compose exec backend python manage.py createsuperuser
 ```
+>>> Загружаем фикстуры
+sudo docker-compose exec backend python manage.py loaddata fixtures/ingredients.json
+```
