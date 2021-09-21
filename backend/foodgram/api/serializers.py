@@ -1,5 +1,5 @@
 from drf_extra_fields.fields import Base64ImageField
-from rest_framework import serializers, decorators
+from rest_framework import serializers
 
 from .models import Ingredient, IngredientAmount, Recipe, Subscribe, Tag, User
 
@@ -84,14 +84,14 @@ class RecipeSerializer(serializers.ModelSerializer):
         data['ingredients'] = ingredients
         return data
 
-    def save_or_update_ingredients(self):
-        for ingredient in self.ingredients_data:
-            ingredients_list = IngredientAmount.objects.create(
-                recipe=self.recipe,
+    def create_bulk_ingredients(self, recipe, ingredients_data):
+        IngredientAmount.objects.bulk_create([
+            IngredientAmount(
                 ingredient_id=ingredient.get('id'),
+                recipe=recipe,
                 amount=ingredient.get('amount'),
-            )
-        return ingredients_list
+            ) for ingredient in ingredients_data
+        ])
 
     def create(self, validated_data):
         image = validated_data.pop('image')
@@ -99,15 +99,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         recipe = Recipe.objects.create(image=image, **validated_data)
         tags_data = self.initial_data.get('tags')
         recipe.tags.set(tags_data)
-
-        recipe.save_or_update_ingredients
-
-        # for ingredient in ingredients_data:
-        #     IngredientAmount.objects.create(
-        #         recipe=recipe,
-        #         ingredient_id=ingredient.get('id'),
-        #         amount=ingredient.get('amount'),
-        #     )
+        self.create_bulk_ingredients(recipe, ingredients_data)
         recipe.is_favorited = False
         recipe.is_in_shopping_cart = False
         return recipe
@@ -120,17 +112,11 @@ class RecipeSerializer(serializers.ModelSerializer):
             'cooking_time', instance.cooking_time
         )
         instance.tags.clear()
+        ingredients_data = validated_data.get('ingredients')
         tags_data = self.initial_data.get('tags')
         instance.tags.set(tags_data)
         IngredientAmount.objects.filter(recipe=instance).all().delete()
-
-        for ingredient in validated_data.get('ingredients'):
-            ingredient_amount_obj = IngredientAmount.objects.create(
-                recipe=instance,
-                ingredient_id=ingredient.get('id'),
-                amount=ingredient.get('amount')
-            )
-            ingredient_amount_obj.save()
+        self.create_bulk_ingredients(instance, ingredients_data)
 
         instance.is_favorited = instance.is_favorited
         instance.is_in_shopping_cart = instance.is_in_shopping_cart
