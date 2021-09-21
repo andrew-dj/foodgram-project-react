@@ -1,4 +1,4 @@
-# praktikum_new_diplom
+# Проект Foodgram
 [![Diploma workflow](https://github.com/andrew-dj/foodgram-project-react/actions/workflows/main.yml/badge.svg)](https://github.com/andrew-dj/foodgram-project-react/actions/workflows/main.yml)
 
 [![Python](https://img.shields.io/badge/-Python-464646?style=flat-square&logo=Python)](https://www.python.org/)
@@ -11,7 +11,7 @@
 [![GitHub%20Actions](https://img.shields.io/badge/-GitHub%20Actions-464646?style=flat-square&logo=GitHub%20actions)](https://github.com/features/actions)
 [![Yandex.Cloud](https://img.shields.io/badge/-Yandex.Cloud-464646?style=flat-square&logo=Yandex.Cloud)](https://cloud.yandex.ru/)
 
-# Проект Foodgram
+# Описание
 Foodgram - сервис для публикации рецептов. Авторизованные пользователи могут подписываться на понравившихся авторов, добавлять рецепты в избранное, в покупки, скачать список покупок ингредиентов для добавленных в покупки рецептов (pdf).
 
 Неавторизованным пользователям доступна регистрация, авторизация, просмотр рецептов других авторов.
@@ -19,9 +19,9 @@ Foodgram - сервис для публикации рецептов. Автор
 # Проект в интернете
 Проект запущен и доступен по [адресу](http://bulynin.ru). 
 
-API можно посмотреть на странице `http://bulynin.ru/api/docs`. 
+API можно посмотреть на странице http://bulynin.ru/api/docs. 
 
-Администрирование доступно на странице `/admin`. (креды: admin@admin.ru, пароль: praktikum2021)
+Администрирование доступно на странице http://bulynin.ru/admin. (креды: admin@admin.ru, пароль: praktikum2021)
 
 # Установка
 1. Склонировать репозиторий
