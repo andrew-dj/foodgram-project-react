@@ -1,9 +1,7 @@
 version: '3.3'
 services:
   frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
+    image: bandrew8544/foodgram-project-frontend
     volumes:
       - ./frontend/:/app/result_build/
   db:
