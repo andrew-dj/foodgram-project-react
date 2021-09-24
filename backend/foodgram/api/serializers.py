@@ -74,13 +74,23 @@ class RecipeSerializer(serializers.ModelSerializer):
         return obj.is_in_shopping_cart
 
     def validate(self, data):
+        errors = []
         ingredients = self.initial_data.get('ingredients')
+        if len(ingredients) == 0:
+            errors.append('Рецепт не может быть вообще '
+                          'без ингредиентов')
         for ingredient_item in ingredients:
             if int(ingredient_item['amount']) < 0:
-                raise serializers.ValidationError({
-                    'ingredients': ('Убедитесь, что значение количества '
-                                    'ингредиента больше 0')
-                })
+                errors.append('Убедитесь, что значение количества '
+                              'ингредиента больше 0')
+        unique_ingredients = set(ingredients)
+        if len(unique_ingredients) != len(ingredients):
+            errors.append('Убедитесь, что все ингредиенты рецепта '
+                          'уникальны')
+        if errors:
+            raise serializers.ValidationError({
+                'ingredients': errors
+            })
         data['ingredients'] = ingredients
         return data
 
