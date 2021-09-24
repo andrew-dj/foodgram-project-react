@@ -75,12 +75,13 @@ class RecipeSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         errors = []
+        ingredients_id = []
         ingredients = self.initial_data.get('ingredients')
-        ingredients_id = ingredients.get('id')
         if len(ingredients) == 0:
             errors.append('Рецепт не может быть вообще '
                           'без ингредиентов')
         for ingredient_item in ingredients:
+            ingredients_id.append(ingredient_item['id'])
             if int(ingredient_item['amount']) < 0:
                 errors.append('Убедитесь, что значение количества '
                               'ингредиента больше 0')
